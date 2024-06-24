@@ -23,9 +23,10 @@ const optionsYargs = yargs(process.argv.slice(2))
   .option("s", {
     alias: "segmento",
     describe: "tipo de segmento",
-    // type: "string",
+    type: "string",
     demandOption: true,
     choices: ["p", "q", "r"],
+    coerce: (value) => value.toLowerCase(),
   })
   .option("p", {
     alias: "path",
@@ -37,11 +38,13 @@ const optionsYargs = yargs(process.argv.slice(2))
     "lista a linha e campo que from e to do cnab",
   ).argv;
 
-const { from, to, segmento, path: filePath } = optionsYargs;
+const { from, to, path: filePath } = optionsYargs;
+const segmento = optionsYargs.segmento.toUpperCase();
 
 const sliceArrayPosition = (arr, ...positions) => [...arr].slice(...positions);
 
-const messageLog = (segmento, segmentoType, from, to) => {
+const messageLog = (register, segmentoType, from, to) => {
+  const segmento = register.segments[segmentoType];
   console.log(`
 ----- Cnab linha ${segmentoType} -----
 
@@ -55,6 +58,8 @@ item dentro da linha P:
   ${segmento.substring(0, from)}${chalk.inverse.bgBlack(
     segmento.substring(from - 1, to),
   )}${segmento.substring(to)}
+
+empresa vinculada ao item: ${register.company}
 
 ----- FIM ------
 `);
@@ -90,13 +95,18 @@ const main = async () => {
 
   const cnabTail = sliceArrayPosition(cnabArray, -2);
 
-  if (segmento === "p") messageLog(cnabBodySegmentoP, "P", from, to);
-  if (segmento === "q") messageLog(cnabBodySegmentoQ, "Q", from, to);
-  if (segmento === "r") messageLog(cnabBodySegmentoR, "R", from, to);
+  const register = {
+    segments: {
+      P: cnabBodySegmentoP,
+      Q: cnabBodySegmentoQ,
+      R: cnabBodySegmentoR,
+    },
+    company: cnabBodySegmentoQ.slice(33, 73),
+  };
+
+  messageLog(register, segmento, from, to);
 
   console.timeEnd("leitura Async");
 };
 
-main().then(() => {
-  process.exit();
-});
+main();
