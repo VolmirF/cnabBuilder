@@ -26,16 +26,28 @@ const optionsYargs = yargs(process.argv.slice(2))
     type: "string",
     demandOption: true,
   })
+  .option("p", {
+    alias: "path",
+    describe: "caminho do arquivo cnab",
+    type: "string",
+  })
   .example(
     "$0 -f 21 -t 34 -s p",
     "lista a linha e campo que from e to do cnab",
   ).argv;
 
+const { from, to, segmento, path: filePath } = optionsYargs;
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const file = path.resolve(`${__dirname}/cnabExample.rem`);
-
-const { from, to, segmento } = optionsYargs;
+const file = path.resolve(filePath || `${__dirname}/cnabExample.rem`);
+if (!filePath) {
+  console.log(
+    chalk.yellow(
+      "Caminho do arquivo cnab não informado. Será utilizado o arquivo padrão cnabExample.rem\n",
+    ),
+  );
+}
 
 const sliceArrayPosition = (arr, ...positions) => [...arr].slice(...positions);
 
@@ -87,6 +99,10 @@ readFile(file, "utf8")
     }
   })
   .catch((error) => {
-    console.log("🚀 ~ file: cnabRows.js ~ line 76 ~ error", error);
+    if (error.code === "ENOENT") {
+      console.log(chalk.red(`Arquivo ${file} não encontrado`));
+    } else {
+      console.log("🚀 ~ file: cnabRows.js ~ line 76 ~ error", error.code);
+    }
   });
 console.timeEnd("leitura Async");
