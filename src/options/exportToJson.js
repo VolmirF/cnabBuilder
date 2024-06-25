@@ -2,8 +2,11 @@ import fs from 'fs/promises';
 import path from 'path';
 import outputMessages from '../outputMessages/index.js';
 
-/** @param {string[]} cnabLinesArray */
-export const exportToJson = async (cnabLinesArray) => {
+/**
+ * @param {string[]} cnabLinesArray
+ * @param {string | undefined} filePath
+ */
+export const exportToJson = async (cnabLinesArray, filePath) => {
   const mappedJson = [];
   for (let i = 1; i < cnabLinesArray.length; i = i + 3) {
     const lineQ = cnabLinesArray[i];
@@ -25,10 +28,8 @@ export const exportToJson = async (cnabLinesArray) => {
     });
   }
 
-  // TODO: new arg for path output (-o, --output)
-
   // Filename is cnabMapped.json if not provided
-  let pathDir = './out';
+  let pathDir = filePath || './out';
   let pathParsed = path.parse(pathDir);
   if (!pathParsed.ext) {
     pathDir += '/cnabMapped.json';

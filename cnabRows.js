@@ -41,6 +41,12 @@ const optionsYargs = yargs(process.argv.slice(2))
     describe: 'exportar dados para JSON',
     type: 'boolean'
   })
+  .option('o', {
+    alias: 'output',
+    describe: 'Caminho do arquivo de saída',
+    implies: ['json'],
+    type: 'string'
+  })
   .option('p', {
     alias: 'path',
     describe: 'caminho do arquivo cnab',
@@ -53,6 +59,11 @@ const optionsYargs = yargs(process.argv.slice(2))
     'busca as empresas que contem o texto NTT no nome e mostra os segmentos encontrados'
   )
   .example('$0 -j', 'exporta os dados para um arquivo JSON')
+  .example(
+    '$0 -j -o ../output.json',
+    'exporta os dados para um arquivo JSON no caminho e com o nome informado'
+  )
+
   .check((argv) => {
     if (
       !argv.from &&
@@ -71,7 +82,16 @@ const optionsYargs = yargs(process.argv.slice(2))
     return true;
   }).argv;
 
-const { from, to, segmento, path: filePath, name, find, json } = optionsYargs;
+const {
+  from,
+  to,
+  segmento,
+  path: filePath,
+  name,
+  find,
+  json,
+  output
+} = optionsYargs;
 
 const main = async () => {
   try {
@@ -83,7 +103,8 @@ const main = async () => {
       filePath,
       name,
       find,
-      json
+      json,
+      output
     );
     console.timeEnd('leitura Async');
   } catch (error) {

@@ -1,5 +1,6 @@
 'use strict';
 
+/** @param {number} registersNumber */
 export const outputFooter = (registersNumber) => {
   const footer = `
 ----------------

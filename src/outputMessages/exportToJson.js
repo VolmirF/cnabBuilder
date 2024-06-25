@@ -2,6 +2,7 @@
 
 import chalk from 'chalk';
 
+/** @param {string} path */
 export const exportToJson = (path) => {
   const outputStr = `
 ----- Cnab exportar para JSON -----

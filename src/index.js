@@ -13,6 +13,7 @@ const sliceArrayPosition = (arr, ...positions) => [...arr].slice(...positions);
  * @param {string | undefined} companyName
  * @param {string | undefined} find
  * @param {boolean | undefined} jsonExport
+ * @param {string | undefined} output
  */
 export const processCLIInput = async (
   from,
@@ -21,7 +22,8 @@ export const processCLIInput = async (
   filePath,
   companyName,
   find,
-  jsonExport
+  jsonExport,
+  output
 ) => {
   const fileData = await readCNABFile(filePath);
   const cnabArray = fileData.split('\n');
@@ -35,7 +37,7 @@ export const processCLIInput = async (
   if (find) optionsProcess.filterSegment(cnabLinesArray, find);
   if (companyName)
     optionsProcess.filterCompanyName(cnabLinesArray, companyName);
-  if (jsonExport) await optionsProcess.exportToJson(cnabLinesArray);
+  if (jsonExport) await optionsProcess.exportToJson(cnabLinesArray, output);
 
   outputMessages.outputFooter(cnabLinesArray.length / 3);
 };
