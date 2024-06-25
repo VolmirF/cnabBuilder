@@ -1,4 +1,5 @@
 'use strict';
+import path from 'path';
 import {
   outputMessage,
   outputFilterNameMessage,
@@ -6,6 +7,7 @@ import {
   outputFilterFindMessage
 } from './outputMessage.js';
 import { readCNABFile } from './readCNABFile.js';
+import fs from 'fs/promises';
 
 const sliceArrayPosition = (arr, ...positions) => [...arr].slice(...positions);
 
@@ -16,6 +18,7 @@ const sliceArrayPosition = (arr, ...positions) => [...arr].slice(...positions);
  * @param {string | undefined} filePath
  * @param {string | undefined} companyName
  * @param {string | undefined} find
+ * @param {boolean | undefined} jsonExport
  */
 export const processCLIInput = async (
   from,
@@ -23,7 +26,8 @@ export const processCLIInput = async (
   segmento,
   filePath,
   companyName,
-  find
+  find,
+  jsonExport
 ) => {
   const fileData = await readCNABFile(filePath);
 
@@ -85,6 +89,34 @@ export const processCLIInput = async (
     }
 
     outputFilterNameMessage(filteredLines, companyName);
+  }
+
+  // Export json
+  if (jsonExport) {
+    const mappedJson = [];
+    for (let i = 1; i < cnabLinesArray.length; i = i + 3) {
+      const lineQ = cnabLinesArray[i];
+      mappedJson.push({
+        company: lineQ.slice(33, 73).trim(),
+        address: {
+          publicPlace: lineQ.slice(73, 113).trim(),
+          neighborhood: lineQ.slice(113, 130).trim(),
+          zipCode: lineQ.slice(128, 136).trim(),
+          city: lineQ.slice(136, 151).trim(),
+          state: lineQ.slice(151, 153).trim()
+        },
+        cnabData: {
+          segmentPLine: i + 2,
+          segmentQLine: i + 3,
+          segmentRLine: i + 4,
+          registerNumber: (i - 1) / 3 + 1
+        }
+      });
+    }
+    // TODO: Use path from 'path' arg if provided
+    // TODO: new arg for path output (-o, --output)
+    await fs.mkdir(path.resolve('./out'), { recursive: true });
+    await fs.writeFile('./out/cnabMapped.json', JSON.stringify(mappedJson));
   }
 
   outputFooter(cnabLinesArray.length / 3);

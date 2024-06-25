@@ -36,6 +36,11 @@ const optionsYargs = yargs(process.argv.slice(2))
     type: 'string',
     coerce: (value) => value.toUpperCase()
   })
+  .option('j', {
+    alias: 'json',
+    describe: 'exportar dados para JSON',
+    type: 'boolean'
+  })
   .option('p', {
     alias: 'path',
     describe: 'caminho do arquivo cnab',
@@ -47,7 +52,7 @@ const optionsYargs = yargs(process.argv.slice(2))
     return true;
   }).argv;
 
-const { from, to, segmento, path: filePath, name, find } = optionsYargs;
+const { from, to, segmento, path: filePath, name, find, json } = optionsYargs;
 
 const main = async () => {
   try {
@@ -58,7 +63,8 @@ const main = async () => {
       segmento.toUpperCase(),
       filePath,
       name,
-      find
+      find,
+      json
     );
     console.timeEnd('leitura Async');
   } catch (error) {
