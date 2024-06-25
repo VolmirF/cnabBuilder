@@ -23,6 +23,31 @@ empresa vinculada ao item: ${register.company}
 
 /**
  * @param {{
+ *   segment: string;
+ *   company: string;
+ *   line: number;
+ * }[]} registers
+ * @param {string} companyName
+ */
+export const outputFilterFindMessage = (registers, text) => {
+  let stringOut = `
+----- Cnab busca por texto/segmento: ${text} -----
+Total de registros encontrados: ${registers.length} 
+ `;
+
+  for (const register of registers) {
+    stringOut += `
+Nome da empresa: ${chalk.inverse.bgBlack(register.company)}
+item encontrado na linha ${chalk.inverse.bold.bgBlack(register.line)} - segmento ${register.segment[13]}: 
+ ${register.segment}
+`;
+  }
+
+  console.log(stringOut);
+};
+
+/**
+ * @param {{
  *   segments: {
  *     P: string;
  *     Q: string;
@@ -38,8 +63,10 @@ export const outputFilterNameMessage = (registers, companyName) => {
 ----- Cnab busca por nome: ${companyName} -----
 Total de registros encontrados: ${registers.length} 
   `;
+
   for (const register of registers) {
     const segmento = register.segments['Q'];
+
     stringOut += `
 Nome da empresa: ${chalk.inverse.bgBlack(register.company)}
 item encontrado na linha ${chalk.inverse.bold.bgBlack(register.line)} - segmento Q: 
