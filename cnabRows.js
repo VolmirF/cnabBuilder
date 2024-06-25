@@ -1,6 +1,7 @@
 'use strict';
 import yargs from 'yargs';
 import { processCLIInput } from './src/index.js';
+import chalk from 'chalk';
 
 const optionsYargs = yargs(process.argv.slice(2))
   .usage('Uso: $0 [options]')
@@ -8,19 +9,18 @@ const optionsYargs = yargs(process.argv.slice(2))
     alias: 'from',
     describe: 'posição inicial de pesquisa da linha do Cnab',
     type: 'number',
-    demandOption: true
+    implies: ['to', 'segmento']
   })
   .option('t', {
     alias: 'to',
     describe: 'posição final de pesquisa da linha do Cnab',
     type: 'number',
-    demandOption: true
+    implies: ['from', 'segmento']
   })
   .option('s', {
     alias: 'segmento',
     describe: 'tipo de segmento',
-    type: 'string',
-    demandOption: true,
+    implies: ['from', 'to'],
     choices: ['p', 'q', 'r'],
     coerce: (value) => value.toLowerCase()
   })
@@ -47,8 +47,27 @@ const optionsYargs = yargs(process.argv.slice(2))
     type: 'string'
   })
   .example('$0 -f 21 -t 34 -s p', 'lista a linha e campo from e to do cnab')
+  .example('$0 -i 25860', 'busca os segmentos que contem o texto 25860')
+  .example(
+    '$0 -n NTT',
+    'busca as empresas que contem o texto NTT no nome e mostra os segmentos encontrados'
+  )
+  .example('$0 -j', 'exporta os dados para um arquivo JSON')
   .check((argv) => {
-    // console.log('argv', argv);
+    if (
+      !argv.from &&
+      !argv.to &&
+      !argv.segmento &&
+      !argv.name &&
+      !argv.find &&
+      !argv.json
+    ) {
+      throw new Error(
+        chalk.red(
+          'É necessário informar pelo menos uma opção de filtro ou export'
+        )
+      );
+    }
     return true;
   }).argv;
 
@@ -60,7 +79,7 @@ const main = async () => {
     await processCLIInput(
       from,
       to,
-      segmento.toUpperCase(),
+      segmento?.toUpperCase(),
       filePath,
       name,
       find,
